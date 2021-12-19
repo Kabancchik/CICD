@@ -1,0 +1,53 @@
+image: php:7.2
+
+stages:
+  - build
+  - test
+  - deploy
+
+composer:
+  stage: build
+  script:
+    - apt-get update -yq
+    - apt-get install git -yq
+    - php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+    - php -r "if (hash_file('sha384', 'composer-setup.php') === 'a5c698ffe4b8e849a443b120cd5ba38043260d5c4023dbf93e1558871f1f07f58274fc6f4c93bcfd858c6bd0775cd8d1') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
+    - php composer-setup.php
+    - php -r "unlink('composer-setup.php');"
+    - php composer.phar install
+  #cache:
+   # key: "build-${CI_COMMIT_REF_SLUG}"
+    #paths:
+     # - vendor/
+  artifacts:
+    paths:
+      - vendor/
+  after_script:
+    - echo "After script build-${CI_COMMIT_REF_SLUG}"
+
+test:
+  before_script:
+    - echo "Before script"
+  script:
+    - ls -la
+    - vendor/bin/phpunit tests
+  stage: test
+  #cache:
+   # key: "build-${CI_COMMIT_REF_SLUG}"
+  dependencies:
+   - composer
+
+deploy:
+  stage: deploy
+  script:
+    - apt-get update -yq
+    - apt-get install -yqq ruby-dev
+    - apt-get install git -yqq
+    - gem install dpl
+    - dpl --provider=heroku --app=octo-weather --api-key=$HEROKU_PRODUCTION_API_KEY
+  dependencies: []
+  environment:
+    name: production
+    url: https://octo-weather.herokuapp.com/
+  only:
+    - master

@@ -1,0 +1,22 @@
+.container {
+    margin-top: 2em;
+    padding: 5px;
+}
+
+.show-block {
+    border: #E0E0E0 1px solid;
+    padding: 20px 40px 40px 40px;
+    border-radius: 2px;
+    margin: 0 auto;
+}
+
+.save-block {
+    margin-top: 20px;
+}
+
+.wind-direction {
+    display: inline-block;
+    font-size: 25px;
+    width: 25px;
+    color: brown;
+}
